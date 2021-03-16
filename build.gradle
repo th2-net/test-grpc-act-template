@@ -7,23 +7,18 @@ buildscript {
         }
         mavenLocal()
     }
-
-    dependencies {
-        classpath "com.google.protobuf:protobuf-gradle-plugin:0.8.13"
-    }
 }
-
 plugins {
-    id "com.jfrog.bintray" version '1.8.5'
+    id 'maven'
+    id 'maven-publish'
+    id 'signing'
+    id "com.google.protobuf" version "0.8.15"
 }
 
 apply plugin: "java"
 apply plugin: "java-library"
-apply plugin: "com.google.protobuf"
-apply plugin: "maven-publish"
-apply plugin: 'com.jfrog.bintray'
 
-group = 'com.exactpro.th2'
+group = 'com.exactpro.test'
 version = release_version
 
 sourceCompatibility = 11
@@ -111,27 +106,73 @@ protobuf {
 
 compileJava.dependsOn.add('generateProto')
 
-// prevent publish to Bintray from gitlab
-tasks.withType(PublishToMavenRepository) {
-    onlyIf {
-        (publication == publishing.publications.mavenJava)
-    }
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
 }
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrh_username, password: ossrh_password)
+      }
+
+      snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrh_username, password: ossrh_password)
+      }
+
+      pom.project {
+        name rootProject.name
+        packaging 'jar'
+        description ''
+        url vcs_url
+
+        scm {
+          url vcs_url
+        }
+
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id developer_id
+            name developer_name
+            email developer_email
+          }
+        }
+      }
+    }
+  }
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-        }
-        bintrayPublication(MavenPublication) {
-            from components.java
-            groupId group
-            artifactId rootProject.name
-            version project.version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', rootProject.name)
-                root.appendNode('url', "${vcs_url}")
-            }
         }
     }
 
@@ -150,25 +191,6 @@ publishing {
             url = "${nexus_url}"
         }
     }
-}
-
-bintray {
-    user = "${bintray_user}"
-    key = "${bintray_key}"
-    publications = ['bintrayPublication']
-    pkg {
-        repo = 'th2'
-        name = rootProject.name
-        userOrg = 'exactpro'
-        licenses = ['Apache-2.0']
-        vcsUrl = "${vcs_url}"
-        version {
-            name = project.version
-            desc = project.version
-            released = new Date()
-        }
-    }
-    publish = true
 }
 
 clean {
