@@ -121,11 +121,14 @@ artifacts {
 }
 
 signing {
-    // def signingKey = findProperty("signingKey")
-    // def signingPassword = findProperty("signingPassword")
-    println("test_message signingKey: ${project.signingKeyId}")
-    println(vcs_url)
-    // println("test_message signingKey: $signingKey")
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    if (hasProperty("signingKey")) {
+        println("signingKey is found")
+    }
+    if (!hasProperty("signingKey")) {
+        println("signingKey is NOT found")
+    }
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign configurations.archives
 }
