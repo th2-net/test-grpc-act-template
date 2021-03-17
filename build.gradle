@@ -149,7 +149,7 @@ uploadArchives {
       pom.project {
         name rootProject.name
         packaging 'jar'
-        description ''
+        description rootProject.description
         url vcs_url
 
         scm {
