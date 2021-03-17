@@ -107,25 +107,25 @@ protobuf {
 
 compileJava.dependsOn.add('generateProto')
 
-// task javadocJar(type: Jar) {
-//     classifier = 'javadoc'
-//     from javadoc
-// }
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
 
-// task sourcesJar(type: Jar) {
-//     classifier = 'sources'
-//     from sourceSets.main.allSource
-// }
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-// artifacts {
-//     archives javadocJar, sourcesJar
-// }
+artifacts {
+    archives javadocJar, sourcesJar
+}
 
 signing {
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+    sign configurations.archives
 }
 
 // uploadArchives {
