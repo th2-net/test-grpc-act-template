@@ -10,7 +10,7 @@ buildscript {
 }
 plugins {
     id 'maven'
-    id 'maven-publish'
+    // id 'maven-publish'
     id 'signing'
     id "com.google.protobuf" version "0.8.15"
 }
@@ -121,8 +121,8 @@ artifacts {
 }
 
 signing {
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
+    // def signingKey = findProperty("signingKey")
+    // def signingPassword = findProperty("signingPassword")
     println("test_message signingKey:")
     // println("test_message signingKey: $signingKey")
     useInMemoryPgpKeys(signingKey, signingPassword)
@@ -171,29 +171,29 @@ uploadArchives {
   }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
+// publishing {
+//     publications {
+//         mavenJava(MavenPublication) {
+//             from components.java
+//         }
+//     }
 
-    repositories {
-        maven {
-            name = 'localRepo'
-            url = sharedDir
-        }
-//Nexus repo for publish from gitlab
-        maven {
-            name = 'nexusRepository'
-            credentials {
-                username = "${nexus_user}"
-                password = "${nexus_password}"
-            }
-            url = "${nexus_url}"
-        }
-    }
-}
+//     repositories {
+//         maven {
+//             name = 'localRepo'
+//             url = sharedDir
+//         }
+// //Nexus repo for publish from gitlab
+//         maven {
+//             name = 'nexusRepository'
+//             credentials {
+//                 username = "${nexus_user}"
+//                 password = "${nexus_password}"
+//             }
+//             url = "${nexus_url}"
+//         }
+//     }
+// }
 
 clean {
     delete genDir
