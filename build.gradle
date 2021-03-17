@@ -123,7 +123,8 @@ artifacts {
 signing {
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
-    println("signingKey: $signingKey")
+    println("test_message signingKey:")
+    println("test_message signingKey: $signingKey")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign configurations.archives
 }
