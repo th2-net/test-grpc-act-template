@@ -18,4 +18,4 @@ jobs:
         with:
           java-version: '11'
       - name: Build with Gradle
-        run: ./gradlew clean build -Possrh_username=${{ secrets.SONATYPE_NEXUS_USERNAME }} -Possrh_password=${{ secrets.SONATYPE_NEXUS_PASSWORD }} -PsigningKey=${{ secrets.SONATYPE_GPG_ARMORED_KEY }} -PsigningPassword=${{ secrets.SONATYPE_SIGNING_PASSWORD }}
+        run: ./gradlew clean build -Possrh_username=${{ secrets.SONATYPE_NEXUS_USERNAME }} -Possrh_password=${{ secrets.SONATYPE_NEXUS_PASSWORD }} -PsigningKey=${{ secrets.SONATYPE_GPG_ARMORED_KEY }} -PsigningPassword=${{ secrets.SONATYPE_SIGNING_PASSWORD }} -PsigningKeyId=${{ SONATYPE_SIGNING_KEY_ID }}
