@@ -12,7 +12,6 @@ plugins {
     id 'maven'
     id 'maven-publish'
     id 'signing'
-    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
     id "com.google.protobuf" version "0.8.15"
 }
 
@@ -107,76 +106,81 @@ protobuf {
 
 compileJava.dependsOn.add('generateProto')
 
-// task javadocJar(type: Jar) {
-//     classifier = 'javadoc'
-//     from javadoc
-// }
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
 
-// task sourcesJar(type: Jar) {
-//     classifier = 'sources'
-//     from sourceSets.main.allSource
-// }
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-// artifacts {
-//     archives javadocJar, sourcesJar
-// }
+artifacts {
+    archives javadocJar, sourcesJar
+}
 
 signing {
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
+    if (hasProperty("signingKey")) {
+        println("signingKey is found")
+    }
+    if (!hasProperty("signingKey")) {
+        println("signingKey is NOT found")
+    }
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+    sign configurations.archives
 }
 
-// uploadArchives {
-//   repositories {
-//     mavenDeployer {
-//       beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-//       repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-//         authentication(userName: ossrh_username, password: ossrh_password)
-//       }
+      repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrh_username, password: ossrh_password)
+      }
 
-//       snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-//         authentication(userName: ossrh_username, password: ossrh_password)
-//       }
+      snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrh_username, password: ossrh_password)
+      }
 
-//       pom.project {
-//         name rootProject.name
-//         packaging 'jar'
-//         description rootProject.description
-//         url vcs_url
+      pom.project {
+        name rootProject.name
+        packaging 'jar'
+        description rootProject.description
+        url vcs_url
 
-//         scm {
-//           url vcs_url
-//         }
-
-//         licenses {
-//           license {
-//             name 'The Apache License, Version 2.0'
-//             url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-//           }
-//         }
-
-//         developers {
-//           developer {
-//             id developer_id
-//             name developer_name
-//             email developer_email
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
+        scm {
+          url vcs_url
         }
-    }
 
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id developer_id
+            name developer_name
+            email developer_email
+          }
+        }
+      }
+    }
+  }
+}
+
+// publishing {
+//     publications {
+//         mavenJava(MavenPublication) {
+//             from components.java
+//         }
+//     }
 
 //     repositories {
 //         maven {
@@ -193,17 +197,7 @@ publishing {
 //             url = "${nexus_url}"
 //         }
 //     }
-}
-nexusPublishing {
-    repositories {
-        sonatype {  //only for users registered in Sonatype after 24 Feb 2021
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username: ossrh_username
-            password: ossrh_password
-        }
-    }
-}
+// }
 
 clean {
     delete genDir
