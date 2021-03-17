@@ -18,7 +18,7 @@ jobs:
         with:
           java-version: '11'
       - name: Build with Gradle
-        run: ./gradlew publishToSonatype --info -Possrh_username=${{ secrets.SONATYPE_NEXUS_USERNAME }} -Possrh_password=${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+        run: ./gradlew clear build publishToSonatype --info -Possrh_username=${{ secrets.SONATYPE_NEXUS_USERNAME }} -Possrh_password=${{ secrets.SONATYPE_NEXUS_PASSWORD }}
         env:
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SONATYPE_GPG_ARMORED_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SONATYPE_SIGNING_PASSWORD }} 
