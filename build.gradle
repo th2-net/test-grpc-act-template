@@ -13,6 +13,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id "com.google.protobuf" version "0.8.15"
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
 }
 
 apply plugin: "java"
@@ -133,47 +134,61 @@ signing {
     sign configurations.archives
 }
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-      repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrh_username, password: ossrh_password)
-      }
-
-      snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrh_username, password: ossrh_password)
-      }
-
-      pom.project {
-        name rootProject.name
-        packaging 'jar'
-        description rootProject.description
-        url vcs_url
-
-        scm {
-          url vcs_url
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from(components.java)
         }
-
-        licenses {
-          license {
-            name 'The Apache License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-          }
-        }
-
-        developers {
-          developer {
-            id developer_id
-            name developer_name
-            email developer_email
-          }
-        }
-      }
     }
-  }
 }
+
+nexusPublishing {
+    repositories {
+        sonatype()
+    }
+}
+
+// uploadArchives {
+//   repositories {
+//     mavenDeployer {
+//       beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+//       repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//         authentication(userName: ossrh_username, password: ossrh_password)
+//       }
+
+//       snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+//         authentication(userName: ossrh_username, password: ossrh_password)
+//       }
+
+//       pom.project {
+//         name rootProject.name
+//         packaging 'jar'
+//         description rootProject.description
+//         url vcs_url
+
+//         scm {
+//           url vcs_url
+//         }
+
+//         licenses {
+//           license {
+//             name 'The Apache License, Version 2.0'
+//             url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//           }
+//         }
+
+//         developers {
+//           developer {
+//             id developer_id
+//             name developer_name
+//             email developer_email
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
 
 // publishing {
 //     publications {
