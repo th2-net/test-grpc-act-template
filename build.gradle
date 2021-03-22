@@ -1,23 +1,11 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name 'Bintray'
-            url 'https://dl.bintray.com/exactpro/th2'
-        }
-        mavenLocal()
-    }
-}
 plugins {
-    id 'maven'
+    id 'java'
+    id 'java-library'
     id 'maven-publish'
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
     id 'signing'
     id "com.google.protobuf" version "0.8.15"
-    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
 }
-
-apply plugin: "java"
-apply plugin: "java-library"
 
 group = 'com.exactpro.test'
 version = release_version
@@ -40,7 +28,6 @@ repositories {
         name 'Bintray'
         url 'https://dl.bintray.com/exactpro/th2'
     }
-    mavenLocal()
 
     configurations.all {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
@@ -107,112 +94,87 @@ protobuf {
 
 compileJava.dependsOn.add('generateProto')
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
-    if (hasProperty("signingKey")) {
-        println("signingKey is found")
+tasks.withType(PublishToMavenRepository) {
+    onlyIf {
+        (repository == publishing.repositories.nexusRepository &&
+            project.hasProperty('nexus_user') &&
+            project.hasProperty('nexus_password') &&
+            project.hasProperty('nexus_password')) ||
+        (repository == publishing.repositories.sonatype &&
+            project.hasProperty('sonatypeUsername') &&
+            project.hasProperty('sonatypePassword')) ||
+        (repository == publishing.repositories.localRepo)
     }
-    if (!hasProperty("signingKey")) {
-        println("signingKey is NOT found")
-    }
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign configurations.archives
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from(components.java)
+            pom {
+              name = rootProject.name
+              packaging = 'jar'
+              description = rootProject.description
+              url = vcs_url
+              scm {
+                url = vcs_url
+              }
+              licenses {
+                license {
+                  name = 'The Apache License, Version 2.0'
+                  url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+              }
+              developers {
+                developer {
+                  id = developer_id
+                  name = developer_name
+                  email = developer_email
+                }
+              }
+              scm {
+                url = vcs_url
+              }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'localRepo'
+            url = sharedDir
+        }
+//Nexus repo to publish from gitlab
+        maven {
+            name = 'nexusRepository'
+            credentials {
+                username = project.findProperty('nexus_user')
+                password = project.findProperty('nexus_password')
+            }
+            url = project.findProperty('nexus_url')
         }
     }
 }
 
 nexusPublishing {
     repositories {
-        sonatype()
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
     }
 }
 
-// uploadArchives {
-//   repositories {
-//     mavenDeployer {
-//       beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-//       repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-//         authentication(userName: ossrh_username, password: ossrh_password)
-//       }
-
-//       snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-//         authentication(userName: ossrh_username, password: ossrh_password)
-//       }
-
-//       pom.project {
-//         name rootProject.name
-//         packaging 'jar'
-//         description rootProject.description
-//         url vcs_url
-
-//         scm {
-//           url vcs_url
-//         }
-
-//         licenses {
-//           license {
-//             name 'The Apache License, Version 2.0'
-//             url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-//           }
-//         }
-
-//         developers {
-//           developer {
-//             id developer_id
-//             name developer_name
-//             email developer_email
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
-
-// publishing {
-//     publications {
-//         mavenJava(MavenPublication) {
-//             from components.java
-//         }
-//     }
-
-//     repositories {
-//         maven {
-//             name = 'localRepo'
-//             url = sharedDir
-//         }
-// //Nexus repo for publish from gitlab
-//         maven {
-//             name = 'nexusRepository'
-//             credentials {
-//                 username = "${nexus_user}"
-//                 password = "${nexus_password}"
-//             }
-//             url = "${nexus_url}"
-//         }
-//     }
-// }
+signing {
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
+}
 
 clean {
     delete genDir
