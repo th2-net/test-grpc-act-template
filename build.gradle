@@ -155,9 +155,9 @@ publishing {
               }
               developers {
                 developer {
-                  id = developer_id
-                  name = developer_name
-                  email = developer_email
+                  id = 'developer'
+                  name = 'developer'
+                  email = 'developer@exactpro.com'
                 }
               }
               scm {
