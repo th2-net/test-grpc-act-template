@@ -1,11 +1,11 @@
-name: Build and publish Java distributions to Bintray.
+name: Build and release Java distributions to sonatype.
 
 on:
   push:
     branches:
     - master
-#    paths:
-#    - gradle.properties
+    paths:
+    - gradle.properties
 
 jobs:
   build:

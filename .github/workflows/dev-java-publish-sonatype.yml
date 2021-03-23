@@ -1,12 +1,12 @@
-name: Dev build and publish Java distributions to maven snapshot repository
+name: Dev build and publish Java distributions to sonatype snapshot repository
 
 on:
   push:
-   branches-ignore:
-   - master
-   - version-*
-#     paths:
-#     - gradle.properties
+    branches-ignore:
+    - master
+    - version-*
+    # paths:
+    # - gradle.properties
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
           property: release_version
       - name: Build custom release version
         id: release_ver
-        run: echo ::set-output name=value::"${{ steps.ver.outputs.value }}-${{ steps.branch.outputs.branch_name }}-${{ github.run_id }}-SANPSHOT"
+        run: echo ::set-output name=value::"${{ steps.ver.outputs.value }}-${{ steps.branch.outputs.branch_name }}-${{ github.run_id }}-SNAPSHOT"
       - name: Write custom release version to file
         uses: christian-draeger/write-properties@1.0.1
         with:
