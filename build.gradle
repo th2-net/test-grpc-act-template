@@ -113,7 +113,7 @@ tasks.withType(PublishToMavenRepository) {
         (repository == publishing.repositories.nexusRepository &&
             project.hasProperty('nexus_user') &&
             project.hasProperty('nexus_password') &&
-            project.hasProperty('nexus_password')) ||
+            project.hasProperty('nexus_url')) ||
         (repository == publishing.repositories.sonatype &&
             project.hasProperty('sonatypeUsername') &&
             project.hasProperty('sonatypePassword')) ||
@@ -133,7 +133,6 @@ tasks.whenTaskAdded {task ->
         task.enabled = false
     }
 }
-
 
 publishing {
     publications {
